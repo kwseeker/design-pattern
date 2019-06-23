@@ -13,7 +13,9 @@
     <module>observer-pattern</module>
     <module>decorator-pattern</module>
     <module>factory-pattern</module>
-      <module>builder-pattern</module>
+    <module>builder-pattern</module>
+    <module>chainofresponsibility-pattern</module>
+    <module>proxy-pattern</module>
   </modules>
 
   <name>design-pattern</name>
