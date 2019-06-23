@@ -16,6 +16,7 @@
     <module>builder-pattern</module>
     <module>chainofresponsibility-pattern</module>
     <module>proxy-pattern</module>
+    <module>template-pattern</module>
   </modules>
 
   <name>design-pattern</name>

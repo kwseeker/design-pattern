@@ -83,7 +83,37 @@
 
 + **template 模板模式**
 
+    业务流程固定，但是业务的每一步有些许变化。
+   
+    使用案例：
+    
+    - Spring 中众多的Template, 如：JdbcTemplate、RedisTemplate etc
+
 + **strategy 策略模式**
+
+    应用场景：  
+    根据用户需求处理数据的时候需要对算法（算法类型固定不变）做出选择；  
+    比如条条大路通罗马，大路的走向和条数基本不变，就可以使用策略模式实现旅行规划。  
+    又比如：网上购物有三种支付方式，微信支付，支付宝支付，银联卡支付，也可以使用策略模式实现。  
+    登录方式。
+    
+    使用策略模式应该注意如何保证策略的易拓展性；推荐使用 Enum 。  
+    使用策略模式，以后面对上面类似场景就再也不用 switch 和 if else 了。  
+    
+    使用案例：
+    
+    - 比较器 Comparator
+        
+        ```
+        new ArrayList<String>().sort(new Comparator() { //重新定义一种比较策略
+            @Override
+            public int compare(String str1, String str2) {
+                return str1.compareTo(str2)；
+            }
+        });
+        ```
+        
+    - Spring 创建 Bean 时选择 BeanFactory 类型
 
 + **state 状态模式**
 
@@ -123,16 +153,32 @@
     - Spring MVC Filter/Interceptor，Spring Security 的认证链
     - Netty 的 ChannelHandler 应该也是
     
+#### 其他模式
+
++ 委派模式   
+
 ## 设计原则（6）
 
 #### 单一职责
 
+要求实现类要职责单一。
+
 #### 里氏替换原则
+
+要求不要去破坏继承系统，每个实现类都可以使用其接口代替。
 
 #### 依赖倒置原则
 
+面向接口编程。
+
 #### 接口隔离原则
+
+设计接口的时候要精简单一。
 
 #### 迪米特法则（最少知道原则）
 
+要降低耦合。
+
 #### 开闭原则（Open Close Principle）   
+
+要求对扩展开放，对修改关闭。即拓展业务的时候是增加新的模块代码，而不是修改旧有模块的代码。
