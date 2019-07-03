@@ -5,6 +5,10 @@
 学习每种设计模式都要关注其设计思想、类图、应用场景。  
 还要关注设计模式之间的关系。  
 
+设计模式通常都不是单独存在的。
+
+设计模式貌似不存在很精确的表述，只是一个大概的样子。
+
 #### 创建型模式
 
 + **singleton 单例模式**
@@ -13,7 +17,45 @@
 
 + **abstractFactory 抽象方法模式**
 
-+ builder 建造者模式
++ **builder 建造者模式** (分离建造过程和表示[图纸]，类似多功能流水线)
+
+    > The Builder is a design pattern designed to provide a flexible solution to various object creation problems in object-oriented programming.   
+      The intent of the Builder design pattern is to separate the construction of a complex object from its representation.
+
+    建造者模式使用简单的对象一步步生成复杂的对象；
+    
+    个人感觉就像一条多功能流水线（如一条可以组装各种车型的造车流水线，或一条组装各种电脑的流水线，或者汉堡店套餐制作流水线）；
+    分别对标 [维基百科案例](https://en.wikipedia.org/wiki/Builder_pattern)，本工程的案例，[runoob.com的案例](https://www.runoob.com/design-pattern/builder-pattern.html)。
+    
+    建造者模式一般包含以下几部分：
+    
+    - 建造指导思想 （IComputerBuilder） 
+        决定我们要造什么，大概的流程。代码中通常是一个接口。
+        比如：我们要造车而不是造电脑，造车大概流程：造汽车骨架，发动机，油箱，座椅，控制系统等等；
+    
+    - 建造图纸 (MacBuilder XiaomiBuilder)
+        设计工程师根据老板的指导思想设计几种车型的详细的建造方案，包括汽车大小，组件选型，成本预算等等。
+        
+    - 建造组件 (Box Cpu HardDisk Memory MotherBoard Power)
+        车骨架、发动机、油箱、座椅、控制系统等等。  
+        建造组件不一定是一成不变的，每种组件也可能分为好多类。
+    
+    - 流水线（Director）
+        拿着图纸规划进行生产的组装流水线。
+    
+    实际案例：
+    
+    - Web框架中的Builder
+    
+        * Mybatis 中建造者模式
+        
+            ![Mybatis建造者模式类图](picture/MybatisBuilder.png)
+        
+            这里的几个Builder实现类除了建造组件都是Configurations等配置数据，
+            没有统一的指导思想和共用的流水线；每个Builder有自己的生产线 parse()。
+            
+            感觉并不是Builder模式，因为建造过程(parse())和表示(XMLXxxBuilder)没有分离；而且这里的场景，
+            建造过程并不通用。
 
 + prototype 原型模式
 
@@ -89,7 +131,9 @@
     
     - Spring 中众多的Template, 如：JdbcTemplate、RedisTemplate etc
 
-+ **strategy 策略模式**
++ **strategy 策略模式**（实现最终目的的方式有多个，但我们不是根据名称选择具体的方法，而是直接选择实现方式的类调用其方法）
+
+    方便拓展策略而不影响现有代码。
 
     应用场景：  
     根据用户需求处理数据的时候需要对算法（算法类型固定不变）做出选择；  
@@ -129,7 +173,9 @@
 
 + **command 命令模式**
 
-+ chainOfResponsibility 责任链模式
++ chainOfResponsibility 责任链模式（请求和处理解藕，请求不做判断直接丢给处理者，处理者判断能不能处理，然后传给其他处理者）
+
+    [使用责任链优化前后对比的案例--采购部采购审批](https://blog.csdn.net/justloveyou_/article/details/68489505)
 
     Web框架中这种模式的应用还是挺多的。
 
