@@ -2,9 +2,11 @@ package top.kwseeker.pattern.singleton;
 
 /**
  * 带缺陷的双重检查锁（DCL）懒汉单例模式
- * 缺陷：由于线程执行指令默认需要先从主内存拷贝拷贝参数到CPU缓存，然后将参数从CPU缓存加载到寄存器进行执行处理；
- *  两个线程的CPU缓存空间是相互不可见的
- *  如果有个线程正在执行将某个值+1操作，但是还没有写回主内存的时候来了第二个线程仍做加1的操作，那么它取的值还是旧的值，
+ * 缺陷：student4 = new Student4(); 由三条字节码指令构成，后两条指令没有happened-before关系，可能发生指令重排。
+ *  memory = allocate();    //1：分配对象的内存空间
+ *  initInstance(memory);   //2：初始化对象
+ *  instance = memory;      //3：设置instance指向刚分配的内存地址
+ *  可能1-2-3，也可能1-3-2
  */
 public class Student4 {
 
