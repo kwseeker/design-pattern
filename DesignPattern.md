@@ -217,7 +217,7 @@
     okhttpClient就是使用的门面模式。okhttpClient包含了post，url等对象。
 
     Slf4j 中使用的是外观模式，不是代理模式。
-    
+
     Facade外观模式、proxy代理模式、mediator中介者模式的区别：
 
 + flyWeight 享元模式
@@ -225,57 +225,187 @@
 + **proxy 代理模式**
 
     代理模式解决的问题：  
-    
+
     将目标类不擅长的工作交给代理类去做；  
     对于模版性的代码，可以交给代理模式去做；  
     为了不修改原来代码的情况下，进行代码增强。  
-    
-    常用动态代理方式： 
-    
-    - Jdk
-      
-        针对带有接口的类进行动态代理
-    
-    - Cglib
-    
-        使用继承的方式进行代理（目标类是父类，代理类是子类）
+
+    注意增强功能默认对所有public方法都有增强，比如：toString()等继承Object的public方法，因为Interface类也是继承Object的。
 
     代理模式分类：  
-    
-    - 静态代理
-    
+
+    - **静态代理**
+
         代理对象保持被代理对象的引用，代理对象的方法调用被代理对象的方法。  
         静态代理不方便业务拓展，被代理对象拓展了业务，代理对象的代码也要响应的做出修改。
-    
-    - 动态代理（针对上面问题的改进型）  
-      
-        使用反射的机制生成一个继承被代理类的动态代理类，然后使用这个生成的动态代理类
-        实现业务逻辑。
+
+    - **动态代理**（针对上面问题的改进型）  
+
+        动态代理和静态代理的区别就是让JVM自动生成代理类而不是程序员手动编写代理类。程序员子需要提供被代理对象和代码增强（InvocationHandler实现类）就行了。
+
+        常用动态代理方式： 
+
+        - Jdk
+
+          针对带有接口的类进行动态代理。
+
+          **Jdk动态代理的原理**
+
+          首先有三个角色：被代理对象（Target类），动态增强类（即实现InvocationHandler，增强比如：方法调用前开启事务、方法结束后提交或者回滚；还有我们自己写的切面逻辑），代理类。
+
+          `代理类`是用`被代理类`和`动态增强类`组合在执行时动态生成的。
+
+          ```java
+          //被代理对象
+          //	以用户服务实现类举例
+          public class UserServiceImpl implements UserService {
+          	@Override
+          	public void saveUser() {
+          		System.out.println("添加用户");
+                  //...
+          	}
+          }
+          
+          //动态增强
+          //	包含一些增强的代码，比如添加些逻辑
+          //	当然如果不用增强则在invoke中直接执行method.invoke()调用被代理类的方法并返回即可
+          //	invoke()定义的增强对所有方法起效
+          public class MyInvocationHandler implements InvocationHandler {
+          	// 目标对象的引用, 代理类最终还是通过反射调用被代理类的方法实现功能，所以要传进来
+          	private Object target;
+          	// 通过构造方法将目标对象注入到代理对象中
+          	public MyInvocationHandler(Object target) {
+          		super();
+          		this.target = target;
+          	}
+          	/**
+          	 * 代理对象会执行的方法
+          	 */
+          	@Override
+          	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          		System.out.println("这是jdk的代理方法");
+          		// 下面的代码，是反射中的API用法
+          		// 该行代码，实际调用的是[目标对象]的方法（利用反射，调用[目标对象]的方法）
+          		Object returnValue = method.invoke(target, args);
+                  // AOP动态代理增强
+          		// AopUtils.invokeJoinpointUsingReflection(this.advised, method, args);
+          		// ReflectiveMethodInvocation.proceed()进行递归增强
+                  
+          		// 增强的部分
+                  //...
+          		return returnValue;
+          	}
+          }
+          
+          //代理类生成：被代理对象+动态增强，通过Proxy.newProxyInstance()动态构建生成
+          //构建流程（JVM做的，可以理解为JVM在执行代理前写了个静态代理类并加载进去）：
+          // 1）编写源文件(java文件)——即编写目标类接口interface实现类（方法的实现结合InvocationHandler实现类的invoke()方法的增强和反射调用目标对象的方法共同实现）；详细查看生成的动态代理类源码
+          // 2）编译源文件为class文件
+          // 3）将class文件加载到JVM中(ClassLoader)
+          // 4）将class文件对应的对象进行实例化（反射）
+          //清楚了上面4个流程，就明白为何newProxyInstance()中要传下面三个参数了
+          // Proxy是JDK中的API类
+          // 第一个参数：目标对象的类加载器
+          // 第二个参数：目标对象的接口
+          // 第二个参数：代理对象的执行处理器
+          Object proxy = Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(), new MyInvocationHandler(target));
+          
+          //代理执行
+          proxy.saveUser();
+          ```
+
+          使用`sun.misc.ProxyGenerator`可以看到代理类的方法实现是调用InvocationHandler的invoke()方法（接口对象和参数传值不同而已，即InvocationHandler的增强会作用于所有的接口），invoke()方法再反射调用被代理类的同名方法。
+
+          如果想对不同的方法使用不用的增强像Spring AOP那样。个人想到可以考虑使用注解，为不同的方法注上不同的注解，在InvocationHandler的invoke()方法中对每种注解添加对应的处理逻辑。（TODO：不知AOP是不是这么实现的，待研究AOP源码）
+
+          ```java
+          public final class $Proxy4 extends Proxy implements Proxy4 {
+          	...
+          	public final void saveUser() throws  {
+                  try {
+                      super.h.invoke(this, m3, (Object[])null);	//m3指saveUser()方法
+                  } catch (RuntimeException | Error var2) {
+                      throw var2;
+                  } catch (Throwable var3) {
+                      throw new UndeclaredThrowableException(var3);
+                  }
+              }
+              public final void selectAllUser() throws  {
+                  try {
+                      super.h.invoke(this, m4, (Object[])null); //m4指selectAllUser()方法
+                  } catch (RuntimeException | Error var2) {
+                      throw var2;
+                  } catch (Throwable var3) {
+                      throw new UndeclaredThrowableException(var3);
+                  }
+              }
+              ...
+          }
+          ```
+
+          
+
+        - Cglib (也基于Jdk动态代理)
+
+          使用继承的方式进行代理（目标类是父类，代理类是子类）。没有实现接口的被代理对象只能通过Cglib代理。但是无法通过接口获取对外服务的方法信息应该怎么生成动态代理类呢？Cglib采用继承的方式，代理类继承被代理类的**非 private 的属性、方法**。
+
+          ```java
+          Enhancer enhancer = new Enhancer();
+          // 设置需要增强的类的类对象
+          enhancer.setSuperclass(clazz);
+          // 设置回调函数
+          enhancer.setCallback(new MyMethodInterceptor());
+          // 获取增强之后的代理对象
+          Object object = enhancer.create();
+          // 然后通过将object强制转换为clazz对象类型，调用方法。
+          ```
+
+          动态代理类接口实现
+
+          ```
+          public final void selectAllGoods() throws  {
+              try {
+              	super.h.invoke(this, m6, (Object[])null);
+              } catch (RuntimeException | Error var2) {
+              	throw var2;
+              } catch (Throwable var3) {
+              	throw new UndeclaredThrowableException(var3);
+              }
+          }
+          ```
+
+          
+
+        <u>Spring AOP 动态代理同时依赖Jdk动态代理和Cglib动态代理；因为Jdk动态代理用于代理实现接口的被代理类；Cglib动态代理用于代理没有接口的被代理类。</u>
+
+        那么为什么没有接口类的被代理类就没法使用Jdk动态代理呢？因为Jdk动态代理生成代理对象需要获取被代理对象实现的所有接口信息Interface。
+
+        ```java
+        Proxy.newProxyInstance(target.getClass().getClassLoader(),
+                        target.getClass().getInterfaces(),	//这一行，没有实现任何接口的类这里数数组为空
+                        new MyInvocationHandler(target));
+        ```
+
         
-        动态代理的原理（字节码重组）：  
-        1 拿到被代理对象的引用，并且反射获取它的所有接口  
-        2 JDK Proxy 重新生成一个新的类，同时新的类要实现被代理类所有实现方法（方法内部还是通过反射调用愿对象的方法）  
-        3 动态生成Java代码，把新加的业务逻辑方法由一定的逻辑代码去调用  
-        4 重新编译新生成的Java代码.class （com.sun.proxy.$Proxy0 这个是运行时动态生成的，可以通过反编译工具查看代码）
-        5 再重新加载到JVM中运行
-        
-        相对于静态代理优势：    
+
+        动态代理相对于静态代理优势：    
         动态代理避免了接口修改的时候造成的代理类的修改；  
         动态代理可以代理大量不同种类的对象，静态代理只能代理一种类型的对象。
-    
-    动态代理和静态代理最大的不同：静态代理在代理之前需要知道被代理对象所有的信息（通常是持有被调离对象的实例引用）；
-    而动态代理不需要知道被代理类的信息，而是代理时通过反射获取被代理对象的信息（可以使用JDK反射或者使用CGLib实现）。
-    
+
     代理模式的优点：
-    
+
     - 解耦
-    
+
     代理模式使用案例：  
-    
+
     - Spring AOP
+
+      AOP的静态织入是通过一些工具在class文件被加载的时候对class文件进行修改（修改的就是代理的代码）；
+
+      AOP的动态织入是通过动态代理方式去实现的。
+
     - 拦截器 
-    
-    Spring AOP 代理实现原理？
+
 
 #### 行为型模式
 
