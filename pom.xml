@@ -19,6 +19,7 @@
     <module>template-pattern</module>
     <module>builder-pattern2</module>
       <module>single-pattern</module>
+      <module>delegate-pattern</module>
   </modules>
 
   <name>design-pattern</name>

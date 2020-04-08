@@ -494,5 +494,18 @@
 #### 其他模式
 
 + 委派模式   
+
+  接受请求的对象将请求委托给另一个对象来处理。委托模式是一项基本技巧，许多其他的模式，如状态模式、策略模式、访问者模式
+  本质上是在更特殊的场合采用了委托模式。委托模式使得我们可以用聚合来替代继承。
+
+  Spring BeanDefinition解析时用到委托模式。`DefaultBeanDefinitionDocumentReader`解析bean xml配置时
+  委托给了`BeanDefinitionParserDelegate`。
+  ```java
+  DefaultBeanDefinitionDocumentReader$doRegisterBeanDefinitions()
+    this.delegate = createDelegate(getReaderContext(), root, parent);
+    parseBeanDefinitions(root, this.delegate);
+      delegate.parseCustomElement(root);  //BeanDefinitionParserDelegate$parseCustomElement()
+  ```
+
 + MVC模式（架构型设计模式）
 
