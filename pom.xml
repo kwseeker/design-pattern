@@ -18,8 +18,8 @@
     <module>proxy-pattern</module>
     <module>template-pattern</module>
     <module>builder-pattern2</module>
-      <module>single-pattern</module>
-      <module>delegate-pattern</module>
+    <module>single-pattern</module>
+    <module>delegate-pattern</module>
   </modules>
 
   <name>design-pattern</name>
@@ -36,6 +36,11 @@
       <artifactId>junit</artifactId>
       <version>4.12</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.16</version>
     </dependency>
   </dependencies>
 
