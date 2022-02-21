@@ -20,6 +20,7 @@
     <module>builder-pattern2</module>
     <module>single-pattern</module>
     <module>delegate-pattern</module>
+      <module>visitor-pattern</module>
   </modules>
 
   <name>design-pattern</name>
