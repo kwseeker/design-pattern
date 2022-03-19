@@ -17,10 +17,10 @@
     <module>chainofresponsibility-pattern</module>
     <module>proxy-pattern</module>
     <module>template-pattern</module>
-    <module>builder-pattern2</module>
-    <module>single-pattern</module>
+    <module>singleton-pattern</module>
     <module>delegate-pattern</module>
-      <module>visitor-pattern</module>
+    <module>visitor-pattern</module>
+    <module>facade-pattern</module>
   </modules>
 
   <name>design-pattern</name>
